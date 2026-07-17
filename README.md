@@ -1,113 +1,112 @@
 # Crystal Widgets — Übersicht Setup on a New Mac
 
-Step-by-step guide to get the custom crystal widget suite (analog clock,
-calendar, htop CPU/memory/swap/load bars, system profiler, top-CPU/top-mem)
-running on a fresh Mac, mirroring the reference setup on the Mac Studio.
+Complete kit for the custom crystal widget suite (analog clock, calendar,
+htop-style CPU/memory/swap/load bars, system profiler, top-CPU/top-mem):
+the widgets themselves, the metrics daemon that feeds them, and step-by-step
+install instructions.
 
-The widgets are driven by [crystal-htop](https://github.com/locupleto/crystal-htop),
-a fork of htop that exports its metrics to plain-text files in real time.
-Pre-compiled binaries (`crystal_htop_arm64` and `crystal_htop_x86`) are shipped
-inside the widgets folder itself — no compilation needed on the target machine.
-
-## Overview
+## Repository layout
 
 ```
-~/config/ubersicht/                     <- widgets folder (copied from an existing machine)
-├── crystal_common.sh                   <- machine-specific settings (EDIT THIS)
-├── crystal_htop_runner.sh              <- starts crystal_htop in a screen session
-├── crystal_htop_arm64                  <- pre-built binary (Apple Silicon)
-├── crystal_htop_x86                    <- pre-built binary (Intel)
-├── crystal-analog-clock.widget/
-├── crystal-calendar.widget/
-├── crystal-htop-cpu-bar.widget/
-├── crystal-htop-load.widget/
-├── crystal-htop-mem-bar.widget/
-├── crystal-htop-swap-bar.widget/
-├── crystal-system-profiler.widget/
-├── crystal-top-cpu.widget/
-└── crystal-top-mem.widget/
-
-$HTOP_TEMP_DIR/                         <- crystal_htop writes metric files here
-├── htop_htoprc                         <- htop configuration (copy from existing machine)
-├── htop_cpu_001.txt ... htop_cpu_NNN.txt
-├── htop_load_avg_*.txt, htop_mem_*.txt, ...
+widgets/     The Übersicht widgets folder — copy to ~/config/ubersicht
+sampler/     crystal_sampler: a small C daemon that samples system metrics
+launchd/     LaunchAgent template that keeps the sampler running
 ```
+
+## Architecture
+
+```
+launchd agent ──> crystal_sampler (1 Hz, Mach/sysctl APIs)
+                        │ atomic rename() writes
+                        ▼
+              $HTOP_TEMP_DIR/metrics.json      <- one consistent JSON snapshot
+              $HTOP_TEMP_DIR/htop_*.txt        <- legacy per-metric files
+                        ▲
+                        │ read every refresh cycle
+              Übersicht widgets (shell command -> stdout -> render)
+```
+
+`crystal_sampler` replaces the earlier
+[crystal-htop](https://github.com/locupleto/crystal-htop) fork (a patched
+htop logging to files from a `screen` session). The sampler reads the same
+metrics directly from `host_processor_info` / `host_statistics64` /
+`sysctl`, publishes the same file names and formats, and adds
+`metrics.json` — a single atomically-renamed snapshot with a `timestamp`
+heartbeat so consumers can distinguish "CPU is flat" from "sampler is dead".
+Every file is written via temp-name + `rename()`, so readers never see a
+torn write. A lock file enforces one instance per output directory.
 
 ## 1. Prerequisites
 
-Install [Homebrew](https://brew.sh) if not present, then:
+Install [Homebrew](https://brew.sh) and the Xcode command-line tools
+(`xcode-select --install`), then:
 
 ```bash
-brew install --cask ubersicht   # the Übersicht app itself
-brew install flock              # single-instance locking used by the runner script
+brew install --cask ubersicht   # the Übersicht app
 brew install fastfetch          # used by the system-profiler widget
 ```
 
-`screen` ships with macOS (`/usr/bin/screen`) — nothing to install.
+> The `ubersicht` cask is marked `auto_updates`; `brew upgrade` skips it
+> unless invoked as `brew upgrade --cask --greedy ubersicht`.
 
-> Note: the `ubersicht` cask is marked `auto_updates`, so `brew upgrade`
-> skips it by default. Use `brew upgrade --cask --greedy ubersicht` to force
-> an upgrade through brew.
-
-## 2. Copy the widgets folder
-
-From a machine that already has the setup (e.g. the Mac Studio):
+## 2. Install the widgets
 
 ```bash
-# run ON the source machine
-rsync -av --exclude .DS_Store ~/config/ubersicht/ <newmac>:config/ubersicht/
+mkdir -p ~/config
+cp -R widgets ~/config/ubersicht
 ```
 
-This brings the widgets, the runner scripts, and both pre-built
-`crystal_htop` binaries in one go.
-
-## 3. Create the metrics directory and copy htoprc
-
-`crystal_htop` needs a writable directory for its metric files. Use a
-persistent one (not `/tmp`, which is wiped at reboot and would lose the
-htop configuration):
+## 3. Build and install the sampler
 
 ```bash
-# on the new machine
-mkdir -p ~/tmp
-
-# from the source machine, copy the htop config
-scp $HTOP_TEMP_DIR/htop_htoprc <newmac>:tmp/htop_htoprc
-# (on the Mac Studio the source path is /Volumes/Work/tmp/htop_htoprc)
+cd sampler
+make                                # universal arm64 + x86_64 binary
+cp crystal_sampler ~/config/ubersicht/
 ```
 
-## 4. Adapt crystal_common.sh
+## 4. Install the LaunchAgent (recommended)
 
-`~/config/ubersicht/crystal_common.sh` is the only file with
-machine-specific settings. On the new machine, set:
+The agent starts the sampler at login and restarts it after a crash. A
+clean exit (another instance already holds the lock) is deliberately not
+respawned.
 
 ```bash
-# Working directory for htop-related widgets (defaults to /tmp if not set)
-export HTOP_TEMP_DIR=/Users/<user>/tmp
-
-# Paths to installation-specific command-line tools
-export FLOCK_CMD=/opt/homebrew/bin/flock        # /usr/local/bin on Intel Macs
-export FASTFETCH_CMD=/opt/homebrew/bin/fastfetch
+sed -e "s/URBAN/$USER/g" launchd/org.ottosson.crystal-sampler.plist \
+  > ~/Library/LaunchAgents/org.ottosson.crystal-sampler.plist
+# Edit HTOP_TEMP_DIR in the installed plist if you change it in
+# crystal_common.sh — the two must match.
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.ottosson.crystal-sampler.plist
 ```
 
-Bar colors and the calendar's first day of week are also configured here.
+Even without the agent the widgets remain self-healing:
+`crystal_htop_runner.sh` (sourced by every htop-style widget) starts the
+sampler on demand if none is running. The agent simply makes ownership of
+the daemon explicit and crash-recovery immediate — belt and braces.
 
-## 5. Point Übersicht at the widgets folder
+## 5. Adapt `crystal_common.sh`
 
-Übersicht stores its "Widgets Folder" preference as a security-scoped
-bookmark (a binary blob), which cannot be copied between machines. Two
-options:
+`~/config/ubersicht/crystal_common.sh` holds the machine-specific settings:
 
-**Option A — symlink (no UI interaction needed):**
+```bash
+export HTOP_TEMP_DIR=$HOME/tmp                        # metrics directory
+export FASTFETCH_CMD=/opt/homebrew/bin/fastfetch      # /usr/local/bin on Intel
+```
+
+Create the metrics directory: `mkdir -p ~/tmp`. Bar colors and the
+calendar's first weekday are configured in the same file.
+
+## 6. Point Übersicht at the widgets folder
+
+Übersicht stores its "Widgets Folder" preference as a machine-specific
+security-scoped bookmark, so it cannot be copied between Macs. Either pick
+the folder once in Übersicht → Preferences, or symlink the default
+location (no UI interaction needed):
 
 ```bash
 osascript -e 'tell application "Übersicht" to quit' 2>/dev/null
 rm -rf "$HOME/Library/Application Support/Übersicht/widgets"
 ln -s "$HOME/config/ubersicht" "$HOME/Library/Application Support/Übersicht/widgets"
 ```
-
-**Option B — UI:** open Übersicht → Preferences → Widgets Folder → select
-`~/config/ubersicht`.
 
 Optional, to mirror the reference preferences (interaction off, no bash env):
 
@@ -116,11 +115,10 @@ defaults write tracesOf.Uebersicht enableInteraction -bool false
 defaults write tracesOf.Uebersicht loginShell -bool false
 ```
 
-## 6. Hide the Apple desktop widgets
+## 7. Hide the stock macOS desktop widgets
 
-The stock macOS desktop widgets (clock, weather, …) visually clash with
-Übersicht. Hide them (this does not delete them — re-enable any time in
-System Settings → Desktop & Dock):
+They visually clash with Übersicht. This hides rather than deletes them
+(revert any time in System Settings → Desktop & Dock):
 
 ```bash
 defaults write com.apple.WindowManager StandardHideWidgets -bool true
@@ -128,10 +126,10 @@ defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
 killall WindowManager
 ```
 
-## 7. Launch at login
+## 8. Launch Übersicht at login
 
-Either tick "Launch Übersicht when I login" in the app's Preferences, or
-install a LaunchAgent:
+Tick "Launch Übersicht when I login" in the app's Preferences, or install
+a LaunchAgent:
 
 ```bash
 cat > ~/Library/LaunchAgents/org.ottosson.ubersicht.plist <<'EOF'
@@ -155,34 +153,61 @@ EOF
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.ottosson.ubersicht.plist
 ```
 
-## 8. Start and verify
+## 9. Start and verify
 
 ```bash
 open -a "Übersicht"
-sleep 8
-
-# crystal_htop should be running in a detached screen session
-screen -ls                    # expect: <pid>.crystal_htop_session (Detached)
-
-# metric files should be streaming
-ls ~/tmp/htop_*               # htop_cpu_001.txt ... htop_load_avg_1.txt ...
-cat ~/tmp/htop_load_avg_1.txt # a live load-average number
+sleep 5
+pgrep -x crystal_sampler          # the daemon is running
+cat ~/tmp/metrics.json            # fresh timestamp, live numbers
+ls ~/tmp/htop_*                   # legacy files for the widgets
 ```
 
-All widgets should now be visible on the desktop. Übersicht registers them
-in `~/Library/Application Support/tracesOf.Uebersicht/WidgetSettings.json`
-if per-widget visibility ever needs checking.
+All widgets should now render. Per-widget visibility is stored in
+`~/Library/Application Support/tracesOf.Uebersicht/WidgetSettings.json`.
+
+## metrics.json
+
+```json
+{
+  "timestamp": 1784291741,
+  "time": "2026-07-17T14:35:41+0200",
+  "interval": 1.0,
+  "load": [4.09, 3.57, 2.75],
+  "tasks": 960,
+  "threads": 5452,
+  "mem": {"total_kib": 67108864, "used_kib": 32787968},
+  "swap": {"total_kib": 0, "used_kib": 0},
+  "cpu": [50.0, 47.5, 47.1]
+}
+```
+
+`timestamp` is the staleness heartbeat: if `now - timestamp` exceeds a few
+intervals, the sampler is dead and a consumer should say so instead of
+rendering frozen numbers. Note: `threads` counts all Mach threads
+(kernel included), so it reads higher than htop's process-thread count.
+
+## Retired components (historical)
+
+The original design ran a patched htop
+([crystal-htop](https://github.com/locupleto/crystal-htop)) inside a
+`screen` session, writing metric files continuously. The sampler replaces
+all of it. No longer needed:
+
+- `crystal_htop_arm64` / `crystal_htop_x86` binaries
+- the `screen` session and `htop_htoprc`
+- the brew `flock` dependency (the old runner serialized widget refreshes;
+  the sampler's own lock file covers this now)
+
+`crystal_htop_runner.sh` survives in reduced form as the on-demand
+fallback starter described in step 4.
 
 ## Troubleshooting
 
 | Symptom | Check |
 |---------|-------|
-| htop widgets empty | Is the screen session running? `screen -ls`. Restart it: `screen -X -S crystal_htop_session quit`, then refresh Übersicht. |
-| "Unsupported architecture" | `uname -m` must be `arm64` or `x86_64`; the runner picks the matching binary. |
-| System-profiler widget empty | Is fastfetch installed at the path set in `FASTFETCH_CMD`? |
-| Widgets not found | Does `~/Library/Application Support/Übersicht/widgets` resolve to the widgets folder (symlink or preference)? |
-| Metric files missing after reboot | `HTOP_TEMP_DIR` must exist; recreate `~/tmp` or point to a persistent directory. |
-
-## Related repositories
-
-- [crystal-htop](https://github.com/locupleto/crystal-htop) — the metric-exporting htop fork (build instructions there if binaries need recompiling)
+| htop widgets empty | `pgrep -x crystal_sampler`; `launchctl print gui/$(id -u)/org.ottosson.crystal-sampler` |
+| Numbers frozen | `metrics.json` timestamp stale → sampler died and nothing restarted it; `launchctl kickstart gui/$(id -u)/org.ottosson.crystal-sampler` |
+| System-profiler widget empty | fastfetch installed at the path in `FASTFETCH_CMD`? |
+| Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
+| Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |

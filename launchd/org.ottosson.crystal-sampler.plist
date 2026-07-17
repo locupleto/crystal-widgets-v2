@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Template: replace URBAN with the actual username and adjust
+         HTOP_TEMP_DIR to match crystal_common.sh before installing. -->
+    <key>Label</key>
+    <string>org.ottosson.crystal-sampler</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/URBAN/config/ubersicht/crystal_sampler</string>
+        <string>1</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HTOP_TEMP_DIR</key>
+        <string>/Users/URBAN/tmp</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Restart only after a crash. A clean exit (another instance already
+         holds the directory lock) must NOT be respawned, or launchd would
+         thrash against the lock. -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
