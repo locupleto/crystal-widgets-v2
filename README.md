@@ -150,6 +150,11 @@ rm -rf "$HOME/Library/Application Support/Übersicht/widgets"
 ln -s "$HOME/config/ubersicht" "$HOME/Library/Application Support/Übersicht/widgets"
 ```
 
+> **If Übersicht ever ran on this machine before**, a previously chosen
+> widgets folder is stored in its preferences and overrides the symlink.
+> Quit Übersicht first, then clear it:
+> `defaults delete tracesOf.Uebersicht widgetDirectory`
+
 Optional, to mirror the reference preferences (interaction off, no bash env):
 
 ```bash
@@ -193,6 +198,11 @@ pgrep -x crystal_sampler          # the daemon is running
 cat ~/tmp/metrics.json            # fresh timestamp, live numbers
 ls ~/tmp/htop_*                   # legacy files for the widgets
 ```
+
+> On the very first launch macOS shows the standard Gatekeeper prompt
+> ("downloaded from the Internet") — click **Open**. Until it is confirmed
+> the app will not start, which over SSH looks like `open` silently doing
+> nothing.
 
 All widgets should now render. Per-widget visibility is stored in
 `~/Library/Application Support/tracesOf.Uebersicht/WidgetSettings.json`.

@@ -29,6 +29,7 @@
 #include <time.h>
 #include <sys/sysctl.h>
 #include <sys/file.h>
+#include <sys/stat.h>
 #include <sys/utsname.h>
 #include <mach/mach.h>
 #include <mach/mach_host.h>
@@ -199,6 +200,10 @@ int main(int argc, char **argv)
     double interval = (argc > 1) ? atof(argv[1]) : 1.0;
     if (interval < 0.2)
         interval = 1.0;
+
+    /* the output directory may not exist yet (fresh install, launchd may
+     * start us before any setup step creates it) — create it ourselves */
+    mkdir(out_dir, 0755);
 
     /* single instance per output directory */
     char lockpath[1024];
