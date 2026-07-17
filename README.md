@@ -14,7 +14,7 @@ widgets/                    The Übersicht widgets folder — copy to ~/config/u
 sampler/                    crystal_sampler: a small C daemon that samples system metrics
 launchd/                    LaunchAgent template that keeps the sampler running
 widget.json                 Übersicht widget-gallery manifest
-crystal-widgets.widget.zip  Self-contained bundle (widgets + prebuilt sampler binary)
+crystal-widgets-v2.widget.zip  Self-contained bundle (widgets + prebuilt sampler binary)
 screenshot.png              Gallery thumbnail (516x320); full-size in docs/
 ```
 
