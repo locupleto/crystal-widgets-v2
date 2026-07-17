@@ -5,6 +5,8 @@ htop-style CPU/memory/swap/load bars, system profiler, top-CPU/top-mem):
 the widgets themselves, the metrics daemon that feeds them, and step-by-step
 install instructions.
 
+![Crystal widgets on the Mac Studio desktop](docs/screenshot.png)
+
 ## Repository layout
 
 ```
