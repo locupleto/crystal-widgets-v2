@@ -146,6 +146,7 @@ location (no UI interaction needed):
 
 ```bash
 osascript -e 'tell application "Übersicht" to quit' 2>/dev/null
+mkdir -p "$HOME/Library/Application Support/Übersicht"   # absent until first launch
 rm -rf "$HOME/Library/Application Support/Übersicht/widgets"
 ln -s "$HOME/config/ubersicht" "$HOME/Library/Application Support/Übersicht/widgets"
 ```
