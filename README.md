@@ -228,6 +228,49 @@ intervals, the sampler is dead and a consumer should say so instead of
 rendering frozen numbers. Note: `threads` counts all Mach threads
 (kernel included), so it reads higher than htop's process-thread count.
 
+## Upgrading from v1
+
+If the machine already runs the original
+[crystal-widgets](https://github.com/locupleto/crystal-widgets) (widgets in
+`~/config/ubersicht`, crystal-htop in a `screen` session), the upgrade is a
+short in-place operation — Übersicht itself keeps running throughout:
+
+```bash
+git clone https://github.com/locupleto/crystal-widgets-v2.git
+cd crystal-widgets-v2
+
+# 1. Refresh the widgets and support scripts in place
+cp -R widgets/. ~/config/ubersicht/
+
+# 2. Build and install the sampler (steps 3-4 of the fresh install)
+(cd sampler && make && cp crystal_sampler ~/config/ubersicht/)
+sed -e "s/URBAN/$USER/g" launchd/org.ottosson.crystal-sampler.plist \
+  > ~/Library/LaunchAgents/org.ottosson.crystal-sampler.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.ottosson.crystal-sampler.plist
+
+# 3. Retire v1: stop crystal-htop and delete its binaries
+screen -X -S crystal_htop_session quit
+rm -f ~/config/ubersicht/crystal_htop_arm64 ~/config/ubersicht/crystal_htop_x86
+
+# 4. Re-apply your machine settings in ~/config/ubersicht/crystal_common.sh
+#    (step 1 overwrote it): HTOP_TEMP_DIR, FASTFETCH_CMD, bar colors,
+#    START_DAY_OF_WEEK. v1 defaulted HTOP_TEMP_DIR to /tmp; the v2 default
+#    is $HOME/tmp — either works, it just must match the LaunchAgent plist.
+```
+
+Notes:
+
+- **Keep the existing widgets-folder preference.** Übersicht already points
+  at `~/config/ubersicht`; the symlink from step 6 is only for machines
+  where Übersicht was never configured. Do NOT clear `widgetDirectory` on
+  an upgrade.
+- The widgets are unchanged between v1 and v2, so nothing needs
+  repositioning; on the next refresh cycle they read the sampler's files
+  instead of crystal-htop's.
+- Stale v1 files in the old temp dir (`htop_htoprc`,
+  `htop_session_list.txt`, `htop_kernel_tasks.txt`, `htop_uptime_.txt`)
+  are no longer used and can be deleted.
+
 ## Retired components (historical)
 
 The original design ran a patched htop
