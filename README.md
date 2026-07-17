@@ -46,6 +46,25 @@ heartbeat so consumers can distinguish "CPU is flat" from "sampler is dead".
 Every file is written via temp-name + `rename()`, so readers never see a
 torn write. A lock file enforces one instance per output directory.
 
+## What changed since v1?
+
+The widgets themselves — look, layout, refresh behaviour — are unchanged
+from [crystal-widgets](https://github.com/locupleto/crystal-widgets) v1.
+What changed is everything behind them:
+
+| | v1 (crystal-widgets) | v2 (this repo) |
+|---|---|---|
+| Metrics producer | [crystal-htop](https://github.com/locupleto/crystal-htop), a patched htop fork | `crystal_sampler`, ~300 lines of C reading Mach/sysctl APIs directly |
+| Process lifecycle | started by widget scripts into a hidden `screen` session | `launchd` agent (starts at login, restarts after crashes); widget scripts remain as fallback |
+| File writes | direct writes (readers could catch a torn/partial file) | temp-name + atomic `rename()` — readers always see a complete snapshot |
+| Consistency | each metric in its own file, written at different moments | plus `metrics.json`: one snapshot with all metrics from the same instant |
+| Staleness detection | none — a dead producer meant silently frozen numbers | `metrics.json` carries a `timestamp` heartbeat |
+| Dependencies | prebuilt htop binaries per arch, `htoprc`, `screen`, brew `flock` | one universal binary; `flock`/`screen`/`htoprc` all gone |
+| Maintenance | rebase the htop patches on every upstream htop release | none — the sampler has no upstream to track |
+
+The legacy `htop_*.txt` file names and formats are still published, so v1
+widgets (or any other consumer of those files) keep working unmodified.
+
 ## 1. Prerequisites
 
 Install [Homebrew](https://brew.sh) and the Xcode command-line tools
