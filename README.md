@@ -1,4 +1,4 @@
-# Crystal Widgets — Übersicht Setup on a New Mac
+# Crystal Widgets — Übersicht Setup on a Mac
 
 Complete kit for the custom crystal widget suite (analog clock, calendar,
 htop-style CPU/memory/swap/load bars, system profiler, top-CPU/top-mem):
