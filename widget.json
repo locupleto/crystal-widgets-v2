@@ -1,0 +1,6 @@
+{
+  "name": "crystal-widgets",
+  "description": "Dark, glassy system-monitor suite: analog clock, calendar, per-core CPU bars, load, memory, swap, top processes and system info, fed by a tiny native metrics daemon (no htop fork required).",
+  "author": "Urban Ottosson",
+  "email": "urban@ottosson.org"
+}

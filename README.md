@@ -10,10 +10,18 @@ install instructions.
 ## Repository layout
 
 ```
-widgets/     The Übersicht widgets folder — copy to ~/config/ubersicht
-sampler/     crystal_sampler: a small C daemon that samples system metrics
-launchd/     LaunchAgent template that keeps the sampler running
+widgets/                    The Übersicht widgets folder — copy to ~/config/ubersicht
+sampler/                    crystal_sampler: a small C daemon that samples system metrics
+launchd/                    LaunchAgent template that keeps the sampler running
+widget.json                 Übersicht widget-gallery manifest
+crystal-widgets.widget.zip  Self-contained bundle (widgets + prebuilt sampler binary)
+screenshot.png              Gallery thumbnail (516x320); full-size in docs/
 ```
+
+The zip is the quick path: unzip into your Übersicht widgets folder and the
+suite works out of the box (a universal `crystal_sampler` binary is
+included). The unzipped `widgets/` + `sampler/` sources remain the
+reviewable, build-it-yourself path described below.
 
 ## Architecture
 
