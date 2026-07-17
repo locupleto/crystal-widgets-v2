@@ -296,3 +296,22 @@ fallback starter described in step 4.
 | System-profiler widget empty | fastfetch installed at the path in `FASTFETCH_CMD`? |
 | Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
 | Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |
+
+## Proven on
+
+This exact guide has been executed end-to-end on every Mac below — spanning
+12 years of hardware, both CPU architectures, and five macOS releases from
+Monterey to Tahoe. The sampler builds from source on all of them with the
+same `make` invocation (universal binary), and the same widgets run
+unmodified everywhere:
+
+| Machine | CPU | RAM | macOS | Install type |
+|---------|-----|-----|-------|--------------|
+| Mac Studio (2022) | Apple M1 Ultra, 20 cores | 64 GB | 26 Tahoe | in-place migration from v1 |
+| MacBook Pro | Apple M3 Pro, 12 cores | 36 GB | 26 Tahoe | in-place migration from v1 |
+| Mac mini | Apple M4, 10 cores | 32 GB | 26 Tahoe | fresh install (headless, over SSH) |
+| MacBook Air (2017) | Intel Core i5, 2 cores | 8 GB | 12 Monterey | fresh install |
+| Mac Pro (2013) | Intel Xeon E5-1650 v2, 6 cores | 64 GB | 12 Monterey | upgrade from v1 |
+
+If it runs on a 2013 trashcan Mac Pro and an M4 mini alike, it will most
+likely run on yours.
