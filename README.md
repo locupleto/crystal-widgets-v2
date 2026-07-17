@@ -144,18 +144,7 @@ defaults write tracesOf.Uebersicht enableInteraction -bool false
 defaults write tracesOf.Uebersicht loginShell -bool false
 ```
 
-## 7. Hide the stock macOS desktop widgets
-
-They visually clash with Übersicht. This hides rather than deletes them
-(revert any time in System Settings → Desktop & Dock):
-
-```bash
-defaults write com.apple.WindowManager StandardHideWidgets -bool true
-defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
-killall WindowManager
-```
-
-## 8. Launch Übersicht at login
+## 7. Launch Übersicht at login
 
 Tick "Launch Übersicht when I login" in the app's Preferences, or install
 a LaunchAgent:
@@ -182,7 +171,7 @@ EOF
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.ottosson.ubersicht.plist
 ```
 
-## 9. Start and verify
+## 8. Start and verify
 
 ```bash
 open -a "Übersicht"
