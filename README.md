@@ -121,8 +121,21 @@ export HTOP_TEMP_DIR=$HOME/tmp                        # metrics directory
 export FASTFETCH_CMD=/opt/homebrew/bin/fastfetch      # /usr/local/bin on Intel
 ```
 
-Create the metrics directory: `mkdir -p ~/tmp`. Bar colors and the
-calendar's first weekday are configured in the same file.
+Create the metrics directory: `mkdir -p ~/tmp`. Bar colors are configured
+in the same file.
+
+### Week start day (calendar widget)
+
+The calendar widget reads `START_DAY_OF_WEEK` from `crystal_common.sh`.
+The shipped config sets it to `MONDAY` (ISO/European convention):
+
+```bash
+export START_DAY_OF_WEEK="MONDAY"
+```
+
+US users who prefer weeks starting on Sunday should set it to `"SUNDAY"`
+— or simply delete the line, since the widget defaults to Sunday when the
+variable is unset. Any value other than `SUNDAY` means Monday-first.
 
 ## 6. Point Übersicht at the widgets folder
 
