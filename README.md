@@ -124,6 +124,18 @@ export FASTFETCH_CMD=/opt/homebrew/bin/fastfetch      # /usr/local/bin on Intel
 Create the metrics directory: `mkdir -p ~/tmp`. Bar colors are configured
 in the same file.
 
+> **Keep `HTOP_TEMP_DIR` on the boot volume.** If it points at an external
+> drive (anything under `/Volumes/...`), macOS shows a
+> *"crystal_sampler would like to access files on a removable volume"*
+> consent dialog the first time the sampler writes there. Worse, the
+> approval is tied to the exact binary: `crystal_sampler` is only ad-hoc
+> signed, so every rebuild produces a new code signature and macOS asks
+> again. A path on the internal disk (such as the default `$HOME/tmp`)
+> never triggers the dialog — the files are tiny, so there is no benefit
+> to keeping them on an external drive. If you must use one, click
+> **Allow** and expect a re-prompt after each rebuild (the grant lives
+> under *System Settings → Privacy & Security → Files & Folders*).
+
 ### Week start day (calendar widget)
 
 The calendar widget reads `START_DAY_OF_WEEK` from `crystal_common.sh`.
@@ -296,6 +308,7 @@ fallback starter described in step 4.
 | System-profiler widget empty | fastfetch installed at the path in `FASTFETCH_CMD`? |
 | Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
 | Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |
+| Recurring "access files on a removable volume" popup | `HTOP_TEMP_DIR` points at an external drive — move it to the boot volume (see step 5), or click Allow after every sampler rebuild |
 
 ## Proven on
 
