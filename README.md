@@ -25,22 +25,33 @@ reviewable, build-it-yourself path described below.
 
 ## Architecture
 
-```
-launchd agent ──> crystal_sampler (1 Hz, Mach/sysctl APIs)
-                        │ atomic rename() writes
-                        ▼
-              $HTOP_TEMP_DIR/metrics.json      <- one consistent JSON snapshot
-              $HTOP_TEMP_DIR/htop_*.txt        <- legacy per-metric files
-                        ▲
-                        │ read every refresh cycle
-              Übersicht widgets (shell command -> stdout -> render)
+```mermaid
+graph TB
+    launchd["launchd agent"] -->|"starts at login, restarts after crashes"| sampler["crystal_sampler<br/>1 Hz sampling via Mach / sysctl APIs"]
+    sampler -->|"atomic rename() writes"| txt
+    sampler -->|"atomic rename() writes"| json
+    subgraph dir["$HTOP_TEMP_DIR"]
+        txt["htop_*.txt<br/>one file per metric — what the widgets read<br/>(crystal-htop file format, so v1 widgets work unchanged)"]
+        json["metrics.json<br/>all metrics in one snapshot + timestamp heartbeat"]
+    end
+    txt -->|"read every refresh cycle"| widgets["Übersicht widgets<br/>shell command → stdout → render"]
+    json -.->|"staleness and health checks"| widgets
+    widgets -.->|"fallback: start sampler if none is running"| sampler
+
+    style launchd fill:#d3f9d8,stroke:#2f9e44,color:#1a1a1a
+    style sampler fill:#e5dbff,stroke:#5f3dc4,color:#1a1a1a
+    style txt fill:#fff4e6,stroke:#e67700,color:#1a1a1a
+    style json fill:#fff4e6,stroke:#e67700,color:#1a1a1a
+    style widgets fill:#c5f6fa,stroke:#0c8599,color:#1a1a1a
 ```
 
-`crystal_sampler` replaces the earlier
+The per-metric `htop_*.txt` files are the interface the widgets consume —
+not a leftover. `crystal_sampler` replaces the earlier
 [crystal-htop](https://github.com/locupleto/crystal-htop) fork (a patched
-htop logging to files from a `screen` session). The sampler reads the same
-metrics directly from `host_processor_info` / `host_statistics64` /
-`sysctl`, publishes the same file names and formats, and adds
+htop logging to files from a `screen` session) but deliberately keeps its
+file names and formats, which is why the v1 widgets carried over unchanged.
+The sampler reads the same metrics directly from `host_processor_info` /
+`host_statistics64` / `sysctl` and adds
 `metrics.json` — a single atomically-renamed snapshot with a `timestamp`
 heartbeat so consumers can distinguish "CPU is flat" from "sampler is dead".
 Every file is written via temp-name + `rename()`, so readers never see a
