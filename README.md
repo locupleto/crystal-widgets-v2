@@ -77,6 +77,7 @@ What changed is everything behind them:
 | Staleness detection | none — a dead producer meant silently frozen numbers | `metrics.json` carries a `timestamp` heartbeat |
 | Dependencies | prebuilt htop binaries per arch, `htoprc`, `screen`, brew `flock` | one universal binary; `flock`/`screen`/`htoprc` all gone |
 | Maintenance | rebase the htop patches on every upstream htop release | none — the sampler has no upstream to track |
+| Weather | — | optional OpenWeatherMap panel with three icon sets (invisible until an API key is configured, see step 6) |
 
 The legacy `htop_*.txt` file names and formats are still published, so v1
 widgets (or any other consumer of those files) keep working unmodified.
