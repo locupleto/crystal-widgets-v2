@@ -11,7 +11,7 @@ refreshFrequency: 30000
 # Styling for the widget
 style: """
   // General widget styling
-  top: 229px;
+  top: 317px;
   left: 10px;
   color: #fff;
   font-family: Helvetica Neue;

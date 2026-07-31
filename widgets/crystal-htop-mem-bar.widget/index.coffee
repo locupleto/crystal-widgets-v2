@@ -16,7 +16,7 @@ style: """
   widget-align = left
 
   // Position of the widget
-  top 584px; //388px //212px
+  top 672px; //388px //212px
   left 10px
 
   // Text and background styling

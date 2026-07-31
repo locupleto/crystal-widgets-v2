@@ -16,7 +16,7 @@ style: """
   widget-align = left
 
   // Position of the widget
-  top: 672px; // Adjusted to original swap widget position
+  top: 760px; // Adjusted to original swap widget position
   left: 10px
 
   // Text and background styling

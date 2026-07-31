@@ -32,3 +32,18 @@ export BAR_BORDER_COLOR='rgba(30, 144, 255, 1.0)'
 # ------ Paths to installation specific command-line tools ------------------
 
 export FASTFETCH_CMD=/opt/homebrew/bin/fastfetch
+
+# ------ crystal-weather settings -------------------------------------------
+
+# OpenWeatherMap API key (free at https://home.openweathermap.org/api_keys).
+# Leave empty to disable the weather panel entirely (it stays invisible).
+export OPENWEATHERMAP_API_KEY=""
+
+# Location as "City,ISO-country-code"
+export WEATHER_LOCATION="Stockholm,SE"
+
+# Units: metric (Celsius, m/s) or imperial (Fahrenheit, mph)
+export WEATHER_UNITS="metric"
+
+# Icon set: meteocons-line (default) | meteocons-fill | weather-icons
+export WEATHER_ICON_SET="meteocons-line"

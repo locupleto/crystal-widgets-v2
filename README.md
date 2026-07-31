@@ -1,9 +1,9 @@
 # Crystal Widgets v2 — Übersicht Setup on a Mac
 
 Complete kit for the custom crystal widget suite (analog clock, calendar,
-htop-style CPU/memory/swap/load bars, system profiler, top-CPU/top-mem):
-the widgets themselves, the metrics daemon that feeds them, and step-by-step
-install instructions.
+optional weather panel, htop-style CPU/memory/swap/load bars, system
+profiler, top-CPU/top-mem): the widgets themselves, the metrics daemon
+that feeds them, and step-by-step install instructions.
 
 ![Crystal widgets on the Mac Studio desktop](docs/screenshot.png)
 
@@ -33,15 +33,20 @@ graph TB
     subgraph dir["$HTOP_TEMP_DIR"]
         txt["htop_*.txt<br/>one file per metric — what the widgets read<br/>(crystal-htop file format, so v1 widgets work unchanged)"]
         json["metrics.json<br/>all metrics in one snapshot + timestamp heartbeat"]
+        wjson["weather.json<br/>current conditions cache (optional weather panel)"]
     end
+    owm["OpenWeatherMap API"] -.->|"curl by the weather widget, max 1 call per 10 min"| wjson
     txt -->|"read every refresh cycle"| widgets["Übersicht widgets<br/>shell command → stdout → render"]
     json -.->|"staleness and health checks"| widgets
+    wjson -.->|"read by crystal-weather"| widgets
     widgets -.->|"fallback: start sampler if none is running"| sampler
 
     style launchd fill:#d3f9d8,stroke:#2f9e44,color:#1a1a1a
     style sampler fill:#e5dbff,stroke:#5f3dc4,color:#1a1a1a
     style txt fill:#fff4e6,stroke:#e67700,color:#1a1a1a
     style json fill:#fff4e6,stroke:#e67700,color:#1a1a1a
+    style wjson fill:#fff4e6,stroke:#e67700,color:#1a1a1a
+    style owm fill:#f8f9fa,stroke:#868e96,color:#1a1a1a
     style widgets fill:#c5f6fa,stroke:#0c8599,color:#1a1a1a
 ```
 
@@ -160,7 +165,59 @@ US users who prefer weeks starting on Sunday should set it to `"SUNDAY"`
 — or simply delete the line, since the widget defaults to Sunday when the
 variable is unset. Any value other than `SUNDAY` means Monday-first.
 
-## 6. Point Übersicht at the widgets folder
+## 6. The weather panel (optional)
+
+`crystal-weather` shows current conditions from OpenWeatherMap —
+temperature, condition icon, feels-like, humidity and wind — in a panel
+directly under the clock and calendar.
+
+**Fail-safe: without an API key the panel is completely invisible.**
+No chrome, no placeholder, nothing to disable — until a key is
+configured the desktop looks exactly as it would without the widget.
+
+To enable it:
+
+1. Create a free API key at
+   [home.openweathermap.org/api_keys](https://home.openweathermap.org/api_keys)
+   (the free tier is far more than needed — the widget polls at most
+   once every 10 minutes).
+2. Set it up in `~/config/ubersicht/crystal_common.sh`:
+
+```bash
+export OPENWEATHERMAP_API_KEY="your-key-here"   # empty = panel hidden
+export WEATHER_LOCATION="Stockholm,SE"          # "City,ISO country code"
+export WEATHER_UNITS="metric"                   # metric | imperial
+export WEATHER_ICON_SET="meteocons-line"        # see below
+```
+
+The panel appears within a minute of a valid key + location.
+
+### Icon sets
+
+Three bundled sets, switchable at any time via `WEATHER_ICON_SET`:
+
+| Value | Set | Look |
+|---|---|---|
+| `meteocons-line` (default) | [Meteocons](https://basmilius.github.io/meteocons/line.html) line style | outlined, subtly animated |
+| `meteocons-fill` | [Meteocons](https://bas.dev/work/meteocons) fill style | filled color, subtly animated |
+| `weather-icons` | [Weather Icons](https://erikflowers.github.io/weather-icons/) | monochrome glyphs, tinted to match the suite |
+
+The SVGs live in `crystal-weather.widget/icons/` — Meteocons by Bas
+Milius (MIT), Weather Icons by Erik Flowers (SIL OFL 1.1); see
+`icons/LICENSES.md` for full attribution.
+
+### Behavior details
+
+- The API is polled at most once per 10 minutes; between polls the
+  widget re-reads `$HTOP_TEMP_DIR/weather.json` (written atomically,
+  like every crystal file).
+- If the network drops, the last conditions stay on screen; after 30
+  minutes a dim `⟳ Nm` age hint appears beside the city name.
+- Misconfiguration (bad key, unknown location) never paints an error on
+  the desktop — the panel simply stays hidden and a message is logged to
+  the Übersicht debug console.
+
+## 7. Point Übersicht at the widgets folder
 
 Übersicht stores its "Widgets Folder" preference as a machine-specific
 security-scoped bookmark, so it cannot be copied between Macs. Either pick
@@ -186,7 +243,7 @@ defaults write tracesOf.Uebersicht enableInteraction -bool false
 defaults write tracesOf.Uebersicht loginShell -bool false
 ```
 
-## 7. Launch Übersicht at login
+## 8. Launch Übersicht at login
 
 Tick "Launch Übersicht when I login" in the app's Preferences, or install
 a LaunchAgent:
@@ -213,7 +270,7 @@ EOF
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.ottosson.ubersicht.plist
 ```
 
-## 8. Start and verify
+## 9. Start and verify
 
 ```bash
 open -a "Übersicht"
@@ -285,7 +342,7 @@ rm -f ~/config/ubersicht/crystal_htop_arm64 ~/config/ubersicht/crystal_htop_x86
 Notes:
 
 - **Keep the existing widgets-folder preference.** Übersicht already points
-  at `~/config/ubersicht`; the symlink from step 6 is only for machines
+  at `~/config/ubersicht`; the symlink from step 7 is only for machines
   where Übersicht was never configured. Do NOT clear `widgetDirectory` on
   an upgrade.
 - The widgets are unchanged between v1 and v2, so nothing needs
@@ -320,6 +377,7 @@ fallback starter described in step 4.
 | Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
 | Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |
 | Recurring "access files on a removable volume" popup | `HTOP_TEMP_DIR` points at an external drive — move it to the boot volume (see step 5), or click Allow after every sampler rebuild |
+| Weather panel not showing | That is the fail-safe: is `OPENWEATHERMAP_API_KEY` set in `crystal_common.sh`? First appearance needs one successful fetch; a bad key or location logs to the Übersicht debug console |
 
 ## Proven on
 
