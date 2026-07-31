@@ -379,6 +379,7 @@ fallback starter described in step 4.
 | Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |
 | Recurring "access files on a removable volume" popup | `HTOP_TEMP_DIR` points at an external drive — move it to the boot volume (see step 5), or click Allow after every sampler rebuild |
 | Weather panel not showing | That is the fail-safe: is `OPENWEATHERMAP_API_KEY` set in `crystal_common.sh`? First appearance needs one successful fetch; a bad key or location logs to the Übersicht debug console |
+| A widget appears on every display | Übersicht defaults new widgets to "all screens". Pin it per widget via the Übersicht menu-bar icon (select the widget → choose the screen); stored in `~/Library/Application Support/tracesOf.Uebersicht/WidgetSettings.json` |
 
 ## Proven on
 
