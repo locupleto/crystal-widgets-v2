@@ -20,7 +20,7 @@ style: """
   left 10px
 
   // Text and background styling
-  color #fff
+  color var(--crystal-static, #fff)
   font-family Helvetica Neue
   background rgba(#FFF, .1)
   padding 10px 10px 15px
