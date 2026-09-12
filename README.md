@@ -368,6 +368,25 @@ all of it. No longer needed:
 `crystal_htop_runner.sh` survives in reduced form as the on-demand
 fallback starter described in step 4.
 
+## The Gallery theme integration
+
+An optional `crystal-theme.widget` reads
+`~/.config/gallery/state/crystal.css` every 2 seconds and injects its
+contents into the shared Übersicht document as CSS custom properties. The
+static text colours, the analog clock's minute/hour hands, and its major/
+minor markers all reference those properties (`var(--crystal-static*,
+<shipped colour>)`), so they only change when the file defines them —
+with no Gallery installed, or with the shipped fallback in place, every
+widget keeps drawing its own colours exactly as before. The CPU, memory,
+and swap bar fill colour is a separate mechanism: it comes from
+`CRYSTAL_BAR_COLOR` in `~/.config/gallery/state/theme.sh`, sourced by
+`crystal_common.sh` to override `BAR_COLOR` / `BAR_BORDER_COLOR`.
+
+This is driven from the-gallery side with `gallery widgets theme|native|
+toggle`. The Gallery's theme picker also exposes it as the `ctrl-u`
+binding, but only while Übersicht is running with these widgets — there is
+nothing to toggle otherwise.
+
 ## Troubleshooting
 
 | Symptom | Check |

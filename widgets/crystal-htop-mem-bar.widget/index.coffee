@@ -45,7 +45,7 @@ style: """
   td
     font-size: 12px
     font-weight: 300
-    color: rgba(#fff, .9)
+    color: var(--crystal-static-90, rgba(255,255,255,.9))
     text-shadow: 0 1px 0px rgba(#000, .7)
     text-align: widget-align
     width: 50px

@@ -27,7 +27,7 @@ border-radius: 5px;
 top: 15px;/*220px;*/
 left: 212px;
 background: rgba(255, 255, 255, .1);
-color: #fff;
+color: var(--crystal-static, #fff);
 font-family: Helvetica Neue;
 width: 178px;
 height: 195px;
@@ -71,7 +71,7 @@ tbody td {
 }
 
 .grey {
-  color: rgba(#C0C0C0, .7);
+  color: var(--crystal-static-70, rgba(192,192,192,.7));
 }
 
 """

@@ -19,7 +19,7 @@ refreshFrequency: 60000
 style: """
   top: 229px
   left: 10px
-  color: #fff
+  color: var(--crystal-static, #fff)
   font-family: Helvetica Neue
 
   .container
@@ -47,7 +47,7 @@ style: """
 
   .weather-icon.tinted svg,
   .weather-icon.tinted svg path
-    fill: rgba(#fff, .92)
+    fill: var(--crystal-static-92, rgba(255,255,255,.92))
 
   .temp
     font-size: 30px
@@ -58,7 +58,7 @@ style: """
   .condition
     font-size: 11px
     font-weight: 300
-    color: rgba(#fff, .9)
+    color: var(--crystal-static-90, rgba(255,255,255,.9))
 
   .secondary
     margin-left: auto
@@ -66,18 +66,18 @@ style: """
     font-size: 11px
     font-weight: 300
     line-height: 15px
-    color: rgba(#fff, .75)
+    color: var(--crystal-static-75, rgba(255,255,255,.75))
 
   .city
     font-size: 10px
     text-transform: uppercase
     font-weight: bold
-    color: #fff
+    color: var(--crystal-static, #fff)
 
   .stale-hint
     font-size: 9px
     font-weight: 300
-    color: rgba(#fff, .45)
+    color: var(--crystal-static-45, rgba(255,255,255,.45))
     margin-right: 4px
 """
 

@@ -9,7 +9,7 @@ refreshFrequency: 2000
 style: """
 top: 584px; //300px
 left: 10px
-color: #fff
+color: var(--crystal-static, #fff)
 font-family: Helvetica Neue
 
 table
@@ -44,20 +44,20 @@ td
 
 .col1 {
   font-weight: normal;
-  color: #ddd;
+  color: var(--crystal-static-85, #ddd);
   text-align: left;  // Align text to the left in the first column
 }
 
 .col2 {
   font-weight: normal;
-  color: #ddd;
+  color: var(--crystal-static-85, #ddd);
   text-align: left;  // Align text to the left in the second column
   padding-left: 15px;
 }
 
 .col3 {
   font-weight: normal;
-  color: #ddd;
+  color: var(--crystal-static-85, #ddd);
   text-align: right;  // Align text to the right in the third column
   padding-right: 5px;
 }
@@ -68,13 +68,13 @@ p
   font-size: 11px
   font-weight: normal
   max-width: 100%
-  color: #ddd
+  color: var(--crystal-static-85, #ddd)
   text-overflow: ellipsis
 
 .pid
     font-size: 11px
     font-weight: normal
-    color: #ddd
+    color: var(--crystal-static-85, #ddd)
     padding-right: 6px
 
 """

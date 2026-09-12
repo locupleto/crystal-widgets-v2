@@ -12,7 +12,7 @@ style: """
   // General widget styling
   top: 406px;
   left: 10px;
-  color: #fff;
+  color: var(--crystal-static, #fff);
   font-family: Helvetica Neue;
   background: rgba(#FFF, .1);
   padding: 10px;

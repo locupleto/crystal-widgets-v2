@@ -13,7 +13,7 @@ style: """
   // General widget styling
   top: 317px;
   left: 10px;
-  color: #fff;
+  color: var(--crystal-static, #fff);
   font-family: Helvetica Neue;
   background: rgba(#FFF, .1);
   padding: 10px 10px 2px;
@@ -30,7 +30,7 @@ style: """
   .stat-row {
     font-size: 11px;
     font-weight: 300;
-    color: rgba(#fff, .9);
+    color: var(--crystal-static-90, rgba(255,255,255,.9));
     text-shadow: 0 1px 0px rgba(#000, .7);
     margin-bottom: 4px; // Spacing between rows
     display: flex; // Use flexbox for layout

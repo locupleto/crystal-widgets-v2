@@ -126,7 +126,7 @@ style: """
   left: #{options.size * options.scale / 2 - options.minPtr.width / 2 * options.scale}px
   width: #{options.minPtr.length * options.scale}px
   height: #{options.minPtr.width * options.scale}px
-  background-color: rgba(255,255,255,1.0);//#{options.minPtr.color}
+  background-color: var(--crystal-static, rgba(255,255,255,1.0))
   border-left: 0px transparent solid
   border-top-left-radius: #{options.minPtr.width / 2 * options.scale}px
   border-bottom-left-radius: #{options.minPtr.width / 2 * options.scale}px
@@ -139,7 +139,7 @@ style: """
   left: #{options.size * options.scale / 2 - options.hrPtr.width / 2 * options.scale}px
   width: #{options.hrPtr.length * options.scale}px
   height: #{options.hrPtr.width * options.scale}px
-  background-color: rgba(255,255,255,1.0); //#{options.hrPtr.color}
+  background-color: var(--crystal-static, rgba(255,255,255,1.0))
   border-left: 0px transparent solid
   border-top-left-radius: #{options.hrPtr.width / 2 * options.scale}px
   border-bottom-left-radius: #{options.hrPtr.width / 2 * options.scale}px
@@ -152,7 +152,7 @@ style: """
   left: #{options.size * options.scale / 2 - (-options.size / 2 + options.majorMarker.length + options.markerOffset) * options.scale}px
   width: #{options.majorMarker.length * options.scale}px
   height: #{options.majorMarker.width * options.scale}px
-  background-color: rgba(255,255,255,1.0)
+  background-color: var(--crystal-static, rgba(255,255,255,1.0))
   transform-origin: #{(-options.size / 2 + options.majorMarker.length + options.markerOffset) * options.scale}px 50%
 
 .markers > .minor
@@ -161,7 +161,7 @@ style: """
   left: #{options.size * options.scale / 2 - (-options.size / 2 + options.minorMarker.length + options.markerOffset) * options.scale}px
   width: #{options.minorMarker.length * options.scale}px
   height: #{options.minorMarker.width * options.scale}px
-  background-color: rgba(255,255,255,0.2)
+  background-color: var(--crystal-static-20, rgba(255,255,255,0.2))
   transform-origin: #{(-options.size / 2 + options.minorMarker.length + options.markerOffset) * options.scale}px 50%
 """
 
