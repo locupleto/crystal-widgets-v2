@@ -15,6 +15,7 @@ sampler/                    crystal_sampler: a small C daemon that samples syste
 launchd/                    LaunchAgent template that keeps the sampler running
 widget.json                 Übersicht widget-gallery manifest
 crystal-widgets-v2.widget.zip  Self-contained bundle (widgets + prebuilt sampler binary)
+make-bundle.sh              Regenerates the zip from widgets/ + sampler/ — run after any change
 screenshot.png              Gallery thumbnail (516x320); full-size in docs/
 ```
 
