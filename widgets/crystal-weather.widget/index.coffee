@@ -19,6 +19,8 @@ refreshFrequency: 60000
 style: """
   top: 229px
   left: 10px
+  width: 390px
+  overflow: hidden
   color: var(--crystal-static, #fff)
   font-family: Helvetica Neue
 

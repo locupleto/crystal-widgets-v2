@@ -12,8 +12,19 @@ export WIDGET_NAME=$(dirname "$0")
 source "$(dirname "$0")/../crystal_common.sh"
 source "$(dirname "$0")/../crystal_htop_runner.sh"
 
-# Fetch the total number of CPU cores
-NUM_CPUS=$(system_profiler SPHardwareDataType 2>/dev/null | grep 'Total Number of Cores' | awk -F': ' '{print $2}' | awk '{print $1}')
+# Übersicht treats anything on stderr as a widget failure and replaces the
+# panel with a white error box, so route diagnostics to a log file instead
+# (or discard them if the directory cannot be written).
+if mkdir -p "$HTOP_TEMP_DIR" 2>/dev/null && touch "$HTOP_TEMP_DIR/crystal-widgets.log" 2>/dev/null; then
+    exec 2>>"$HTOP_TEMP_DIR/crystal-widgets.log"
+else
+    exec 2>/dev/null
+fi
+
+# Number of logical CPUs -- the sampler publishes one file per logical CPU.
+# sysctl answers instantly; system_profiler can take seconds on a cold boot,
+# which is longer than this widget's 1 s refresh budget.
+NUM_CPUS=$(sysctl -n hw.logicalcpu 2>/dev/null || echo 0)
 
 # Initialize the CPUs string
 CPUs=""

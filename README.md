@@ -388,7 +388,8 @@ for it.
 | Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
 | Sampler exits immediately | Another instance holds `$HTOP_TEMP_DIR/crystal_sampler.lock` — that is by design |
 | Recurring "access files on a removable volume" popup | `HTOP_TEMP_DIR` points at an external drive — move it to the boot volume (see step 5), or click Allow after every sampler rebuild |
-| Weather panel not showing | That is the fail-safe: is `OPENWEATHERMAP_API_KEY` set in `crystal_common.sh`? First appearance needs one successful fetch; a bad key or location logs to the Übersicht debug console |
+| Weather panel not showing | That is the fail-safe: is `OPENWEATHERMAP_API_KEY` set in `crystal_common.sh`? First appearance needs one successful fetch; a bad key or location is logged to `$HTOP_TEMP_DIR/crystal-widgets.log` |
+| A widget replaced by a white box of monospace text | That is Übersicht's own error rendering: the widget's command wrote to stderr or ran longer than its `refreshFrequency`. The runners now send stderr to `$HTOP_TEMP_DIR/crystal-widgets.log` — read it there |
 | A widget appears on every display | Übersicht defaults new widgets to "all screens". Pin it per widget via the Übersicht menu-bar icon (select the widget → choose the screen); stored in `~/Library/Application Support/tracesOf.Uebersicht/WidgetSettings.json` |
 
 ## Proven on

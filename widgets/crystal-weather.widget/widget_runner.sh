@@ -21,7 +21,15 @@ if [ -f "$common_script" ]; then
 fi
 
 export HTOP_TEMP_DIR=${HTOP_TEMP_DIR:-/tmp}
-mkdir -p "$HTOP_TEMP_DIR"
+
+# Übersicht treats anything on stderr as a widget failure and replaces the
+# panel with a white error box, so route diagnostics to a log file instead
+# (or discard them if the directory cannot be written).
+if mkdir -p "$HTOP_TEMP_DIR" 2>/dev/null && touch "$HTOP_TEMP_DIR/crystal-widgets.log" 2>/dev/null; then
+    exec 2>>"$HTOP_TEMP_DIR/crystal-widgets.log"
+else
+    exec 2>/dev/null
+fi
 
 WEATHER_UNITS=${WEATHER_UNITS:-metric}
 WEATHER_ICON_SET=${WEATHER_ICON_SET:-meteocons-line}
@@ -65,7 +73,7 @@ if [ "$stamp_age" -ge "$FETCH_INTERVAL" ]; then
             mv -f "$tmp" "$CACHE"            # atomic publish, same volume
         else
             rm -f "$tmp"
-            echo "crystal-weather: OWM fetch failed (HTTP ${http_code:-none}) for '$WEATHER_LOCATION'" >&2
+            echo "$(date '+%F %T') crystal-weather: OWM fetch failed (HTTP ${http_code:-none}) for '$WEATHER_LOCATION'" >&2
         fi
     fi
 fi

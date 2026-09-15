@@ -15,6 +15,15 @@ if [ -f "$common_script" ]; then
 fi
 source "$(dirname "$0")/../crystal_htop_runner.sh"
 
+# Übersicht treats anything on stderr as a widget failure and replaces the
+# panel with a white error box, so route diagnostics to a log file instead
+# (or discard them if the directory cannot be written).
+if mkdir -p "$HTOP_TEMP_DIR" 2>/dev/null && touch "$HTOP_TEMP_DIR/crystal-widgets.log" 2>/dev/null; then
+    exec 2>>"$HTOP_TEMP_DIR/crystal-widgets.log"
+else
+    exec 2>/dev/null
+fi
+
 # Fetch total tasks and threads
 TOTAL_TASKS=$(cat "$HTOP_TEMP_DIR/htop_total_tasks.txt" 2>/dev/null || echo "0")
 THREADS=$(cat "$HTOP_TEMP_DIR/htop_threads.txt" 2>/dev/null || echo "0")

@@ -13,7 +13,17 @@ export WIDGET_NAME=$(dirname "$0")
 
 # Source the common configuration script
 source "$(dirname "$0")/../crystal_common.sh"
+export HTOP_TEMP_DIR=${HTOP_TEMP_DIR:-/tmp}
 export START_DAY_OF_WEEK=${START_DAY_OF_WEEK:-SUNDAY}
+
+# Übersicht treats anything on stderr as a widget failure and replaces the
+# panel with a white error box, so route diagnostics to a log file instead
+# (or discard them if the directory cannot be written).
+if mkdir -p "$HTOP_TEMP_DIR" 2>/dev/null && touch "$HTOP_TEMP_DIR/crystal-widgets.log" 2>/dev/null; then
+    exec 2>>"$HTOP_TEMP_DIR/crystal-widgets.log"
+else
+    exec 2>/dev/null
+fi
 
 # Define calendar commands
 sundayFirstCalendar='cal -h && date "+%-m %-d %y"'
