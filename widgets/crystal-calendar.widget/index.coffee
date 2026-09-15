@@ -13,7 +13,11 @@ do { prevline=$0; if (getline == 0) exit; print " " \
 substr(prevline,4,17) " " substr($0,1,2) " "; } while (1) }\' && date "+%-m %-d %y"'
 
 # figure out if user wants Monday or Sunday as the first day of the week
-command: "crystal-calendar.widget/widget_runner.sh"
+# Übersicht runs this from the ROOT of the widgets folder, so a fixed
+# relative path breaks the moment the suite sits one folder deeper (the
+# usual result of unzipping the bundle). Locate our own script instead,
+# and run it through bash so a lost executable bit cannot break it either.
+command: "f=$(find . -maxdepth 4 -type f -path \"*/crystal-calendar.widget/widget_runner.sh\" -print -quit 2>/dev/null); [ -n \"$f\" ] && bash \"$f\""
 
 # Set this to true to enable previous and next month dates, or false to disable
 otherMonths: true

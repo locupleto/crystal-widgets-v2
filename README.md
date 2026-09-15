@@ -51,7 +51,9 @@ xattr -dr com.apple.quarantine ~/config/ubersicht
 
 Then continue with step 4 (the template is at
 `~/config/ubersicht/launchd/org.ottosson.crystal-sampler.plist`), step 5
-and onward. The `widgets/` + `sampler/` sources remain the reviewable,
+and onward. (Since 2026-09-15 the widgets also tolerate being left one
+folder deeper than this — each one locates its own helper script — but
+the flat layout is still what the LaunchAgent template expects.) The `widgets/` + `sampler/` sources remain the reviewable,
 build-it-yourself path.
 
 ## Architecture
@@ -415,6 +417,7 @@ for it.
 
 | Symptom | Check |
 |---------|-------|
+| `bash: line 1: crystal-…widget/widget_runner.sh: No such file or directory` | A bundle older than 2026-09-15 unzipped one folder too deep — Übersicht runs commands from the widgets folder root. Re-download the zip (current widgets locate their own scripts) or move the contents up one level |
 | htop widgets empty | `pgrep -x crystal_sampler`; `launchctl print gui/$(id -u)/org.ottosson.crystal-sampler`. `last exit code = 78` or *Missing executable* in that output means Gatekeeper trashed a quarantined `crystal_sampler` — see the quarantine note under *Quick install from the zip* |
 | Numbers frozen | `metrics.json` timestamp stale → sampler died and nothing restarted it; `launchctl kickstart gui/$(id -u)/org.ottosson.crystal-sampler` |
 | System-profiler widget empty | fastfetch installed at the path in `FASTFETCH_CMD`? |

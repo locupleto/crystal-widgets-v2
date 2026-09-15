@@ -2,7 +2,11 @@
 #
 # https://github.com/locupleto/crystal-widgets
 
-command: "crystal-system-profiler.widget/widget_script.sh"
+# Übersicht runs this from the ROOT of the widgets folder, so a fixed
+# relative path breaks the moment the suite sits one folder deeper (the
+# usual result of unzipping the bundle). Locate our own script instead,
+# and run it through bash so a lost executable bit cannot break it either.
+command: "f=$(find . -maxdepth 4 -type f -path \"*/crystal-system-profiler.widget/widget_script.sh\" -print -quit 2>/dev/null); [ -n \"$f\" ] && bash \"$f\""
 
 # Frequency of data refresh once every 24 hours
 #refreshFrequency: 86400000

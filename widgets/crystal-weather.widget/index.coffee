@@ -6,7 +6,11 @@
 # invisible unless OPENWEATHERMAP_API_KEY is configured in
 # crystal_common.sh and at least one fetch has succeeded (fail-safe).
 
-command: "crystal-weather.widget/widget_runner.sh"
+# Übersicht runs this from the ROOT of the widgets folder, so a fixed
+# relative path breaks the moment the suite sits one folder deeper (the
+# usual result of unzipping the bundle). Locate our own script instead,
+# and run it through bash so a lost executable bit cannot break it either.
+command: "f=$(find . -maxdepth 4 -type f -path \"*/crystal-weather.widget/widget_runner.sh\" -print -quit 2>/dev/null); [ -n \"$f\" ] && bash \"$f\""
 
 # Frequency of data refresh. The runner only calls the OpenWeatherMap
 # API every 10 minutes; in between it re-reads the local cache, so this
