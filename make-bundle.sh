@@ -15,6 +15,8 @@ bundle="$stage/crystal-widgets-v2.widget"
 
 cp -R widgets "$bundle"
 cp sampler/crystal_sampler "$bundle/"
+mkdir -p "$bundle/launchd"
+cp launchd/org.ottosson.crystal-sampler.plist "$bundle/launchd/"
 find "$bundle" -name .DS_Store -delete
 
 rm -f crystal-widgets-v2.widget.zip

@@ -14,15 +14,45 @@ widgets/                    The Übersicht widgets folder — copy to ~/config/u
 sampler/                    crystal_sampler: a small C daemon that samples system metrics
 launchd/                    LaunchAgent template that keeps the sampler running
 widget.json                 Übersicht widget-gallery manifest
-crystal-widgets-v2.widget.zip  Self-contained bundle (widgets + prebuilt sampler binary)
+crystal-widgets-v2.widget.zip  Self-contained bundle (widgets + prebuilt sampler + launchd template)
 make-bundle.sh              Regenerates the zip from widgets/ + sampler/ — run after any change
 screenshot.png              Gallery thumbnail (516x320); full-size in docs/
 ```
 
-The zip is the quick path: unzip into your Übersicht widgets folder and the
-suite works out of the box (a universal `crystal_sampler` binary is
-included). The unzipped `widgets/` + `sampler/` sources remain the
-reviewable, build-it-yourself path described below.
+### Quick install from the zip
+
+The zip is the quick path: it holds the contents of `widgets/`, a prebuilt
+universal `crystal_sampler`, and the `launchd/` template, so steps 2–3
+below are covered. Do the prerequisites (step 1) first, then:
+
+```bash
+# 1. Unzip. The archive expands to ONE folder, crystal-widgets-v2.widget/;
+#    that folder IS the widgets folder — install it flat, not nested:
+unzip crystal-widgets-v2.widget.zip
+mkdir -p ~/config
+mv crystal-widgets-v2.widget ~/config/ubersicht
+
+# 2. Clear the download quarantine flag — REQUIRED, see below:
+xattr -dr com.apple.quarantine ~/config/ubersicht
+```
+
+> **Why the `xattr` step is not optional.** A zip downloaded with a browser
+> carries macOS's quarantine flag, and Finder's unzip passes it on to every
+> file inside. `crystal_sampler` is only ad-hoc signed (not notarized), so
+> the first time launchd or a widget starts it, Gatekeeper suspends it and
+> shows *"crystal_sampler" Not Opened — Apple could not verify…* with just
+> two buttons, **Move to Trash** and **Done**. There is no "open anyway":
+> Done leaves the binary suspended, Move to Trash deletes it, and either
+> way the htop-style widgets stay at zero with nothing on screen to say
+> why. If that already happened, drag `crystal_sampler` back from the
+> Trash into `~/config/ubersicht` and run the `xattr` command. Building
+> the sampler yourself (step 3) avoids the issue entirely, since a binary
+> you compiled locally is never quarantined.
+
+Then continue with step 4 (the template is at
+`~/config/ubersicht/launchd/org.ottosson.crystal-sampler.plist`), step 5
+and onward. The `widgets/` + `sampler/` sources remain the reviewable,
+build-it-yourself path.
 
 ## Architecture
 
@@ -118,6 +148,8 @@ clean exit (another instance already holds the lock) is deliberately not
 respawned.
 
 ```bash
+# from the repo root; zip installs have the template at
+# ~/config/ubersicht/launchd/org.ottosson.crystal-sampler.plist
 sed -e "s/URBAN/$USER/g" launchd/org.ottosson.crystal-sampler.plist \
   > ~/Library/LaunchAgents/org.ottosson.crystal-sampler.plist
 # Edit HTOP_TEMP_DIR in the installed plist if you change it in
@@ -383,7 +415,7 @@ for it.
 
 | Symptom | Check |
 |---------|-------|
-| htop widgets empty | `pgrep -x crystal_sampler`; `launchctl print gui/$(id -u)/org.ottosson.crystal-sampler` |
+| htop widgets empty | `pgrep -x crystal_sampler`; `launchctl print gui/$(id -u)/org.ottosson.crystal-sampler`. `last exit code = 78` or *Missing executable* in that output means Gatekeeper trashed a quarantined `crystal_sampler` — see the quarantine note under *Quick install from the zip* |
 | Numbers frozen | `metrics.json` timestamp stale → sampler died and nothing restarted it; `launchctl kickstart gui/$(id -u)/org.ottosson.crystal-sampler` |
 | System-profiler widget empty | fastfetch installed at the path in `FASTFETCH_CMD`? |
 | Widgets not found | `~/Library/Application Support/Übersicht/widgets` resolves to the widgets folder? |
