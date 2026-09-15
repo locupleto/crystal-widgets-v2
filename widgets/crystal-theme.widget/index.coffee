@@ -2,14 +2,12 @@
 #
 # https://github.com/locupleto/crystal-widgets
 #
-# Publishes The Gallery's crystal colour variables into the shared Übersicht
-# document so every crystal widget can pick them up with var(--crystal-*)
-# and fall back to its own shipped colour when the Gallery is absent or its
-# widget colouring is switched off (`gallery widgets native`).
+# Publishes an optional external colour feed into the shared Übersicht
+# document so every crystal widget can pick it up with var(--crystal-*)
+# and fall back to its own shipped colour when the feed is absent.
 #
-# ~/.config/gallery/state/crystal.css is written by the-gallery's
-# tools/render-theme.py; empty or missing means "no override". This widget
-# draws nothing itself.
+# The feed is a CSS file defining --crystal-* custom properties; empty or
+# missing means "no override". This widget draws nothing itself.
 
 command: "cat \"$HOME/.config/gallery/state/crystal.css\" 2>/dev/null || true"
 

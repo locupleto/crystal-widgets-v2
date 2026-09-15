@@ -21,9 +21,8 @@ export START_DAY_OF_WEEK="MONDAY"
 export BAR_COLOR='rgba(30, 144, 255, 1.0)'  
 export BAR_BORDER_COLOR='rgba(30, 144, 255, 1.0)' 
 
-# The Gallery theme integration: override the bar color from the active
-# Gallery theme when present (see the-gallery tools/render-theme.py), else
-# keep the default above.
+# External theme hook: an optional theme file may override the bar color
+# via CRYSTAL_BAR_COLOR; when it is absent the default above is kept.
 if [ -f "$HOME/.config/gallery/state/theme.sh" ]; then
   . "$HOME/.config/gallery/state/theme.sh"
   export BAR_COLOR="${CRYSTAL_BAR_COLOR:-$BAR_COLOR}"

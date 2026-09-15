@@ -45,9 +45,9 @@ style: """
     width: 100%
     height: 100%
 
-  // meteocons-line bakes its colours in as stroke attributes. In Gallery
-  // theme mode only the greys (cloud, moon and fog outlines) follow the
-  // static colour; sun, rain and snow keep their own.
+  // meteocons-line bakes its colours in as stroke attributes. When an
+  // external theme feed is present only the greys (cloud, moon and fog
+  // outlines) follow the static colour; sun, rain and snow keep their own.
   .weather-icon svg [stroke="#e5e7eb"]
     stroke: var(--crystal-static-90, #e5e7eb)
 
