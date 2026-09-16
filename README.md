@@ -32,9 +32,24 @@ unzip crystal-widgets-v2.widget.zip
 mkdir -p ~/config
 mv crystal-widgets-v2.widget ~/config/ubersicht
 
-# 2. Clear the download quarantine flag — REQUIRED, see below:
+# 2. Clear the download quarantine flag — REQUIRED, see below. The last
+#    argument is the folder you just installed into; xattr prints its usage
+#    text and does nothing if you leave it off:
 xattr -dr com.apple.quarantine ~/config/ubersicht
 ```
+
+If you keep the widgets in Übersicht's default folder instead (the one
+its *Open Widgets Folder* menu item opens), point the command there — the
+space in the path must be escaped or quoted:
+
+```bash
+xattr -dr com.apple.quarantine ~/Library/Application\ Support/Übersicht/widgets
+```
+
+Only `crystal_sampler` is actually subject to Gatekeeper, so the minimal
+form is `xattr -d com.apple.quarantine <widgets folder>/crystal_sampler`
+(or `…/crystal-widgets-v2.widget/crystal_sampler` in the nested layout);
+the recursive form above simply clears everything in one go.
 
 > **Why the `xattr` step is not optional.** A zip downloaded with a browser
 > carries macOS's quarantine flag, and Finder's unzip passes it on to every
