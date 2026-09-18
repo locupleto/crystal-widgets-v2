@@ -203,6 +203,18 @@ in the same file.
 > **Allow** and expect a re-prompt after each rebuild (the grant lives
 > under *System Settings → Privacy & Security → Files & Folders*).
 
+### CPU bars on Hyper-Threaded Intel Macs
+
+The CPU widget draws one bar per logical CPU, so a 6-core/12-thread Xeon
+shows twelve bars. To fold each core's hyperthreads into a single bar
+(showing their average), set in `crystal_common.sh`:
+
+```bash
+export CPU_BARS="physical"     # default: "logical"
+```
+
+Apple-silicon Macs have no SMT, so the setting makes no difference there.
+
 ### Week start day (calendar widget)
 
 The calendar widget reads `START_DAY_OF_WEEK` from `crystal_common.sh`.

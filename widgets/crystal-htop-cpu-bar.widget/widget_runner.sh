@@ -26,14 +26,12 @@ fi
 # which is longer than this widget's 1 s refresh budget.
 NUM_CPUS=$(sysctl -n hw.logicalcpu 2>/dev/null || echo 0)
 
-# Initialize the CPUs string
-CPUs=""
-
 # Default values for BAR_COLOR and BAR_BORDER_COLOR if not set
 BAR_COLOR="${BAR_COLOR:-rgba(30, 144, 255, 1.0)}"
 BAR_BORDER_COLOR=${BAR_BORDER_COLOR:-'rgba(255, 255, 255, 0.3)'} 
 
-# Loop through each CPU and fetch its usage
+# Loop through each logical CPU and fetch its usage
+USAGES=()
 for (( i=1; i<=NUM_CPUS; i++ )); do
     CPU_FILE="$HTOP_TEMP_DIR/htop_cpu_$(printf "%03d" $i).txt"
     if [[ -f "$CPU_FILE" ]]; then
@@ -41,11 +39,27 @@ for (( i=1; i<=NUM_CPUS; i++ )); do
     else
         CPU_USAGE=0
     fi
-    CPUs+="$CPU_USAGE;"
+    USAGES+=("$CPU_USAGE")
 done
 
-# Remove the trailing semi-colon
-CPUs=${CPUs%?}
+# CPU_BARS=physical (crystal_common.sh) folds the hyperthreads of each core
+# into a single bar showing their average, so a 6-core/12-thread Intel Mac
+# draws six bars instead of twelve. macOS numbers sibling threads
+# consecutively (logical CPUs 1-2 share core 1, 3-4 core 2, ...). Machines
+# without SMT have as many logical as physical CPUs and are left untouched.
+CPUs=""
+if [[ "${CPU_BARS:-logical}" == "physical" ]]; then
+    NUM_CORES=$(sysctl -n hw.physicalcpu 2>/dev/null || echo 0)
+    if (( NUM_CORES > 0 && NUM_CPUS > NUM_CORES && NUM_CPUS % NUM_CORES == 0 )); then
+        CPUs=$(printf '%s\n' "${USAGES[@]}" | awk -v per_core=$(( NUM_CPUS / NUM_CORES )) '
+            { sum += $1 }
+            NR % per_core == 0 { out = out (out == "" ? "" : ";") sprintf("%.1f", sum / per_core); sum = 0 }
+            END { printf "%s", out }')
+    fi
+fi
+if [[ -z "$CPUs" ]]; then
+    CPUs=$(IFS=';'; echo "${USAGES[*]}")
+fi
 
 # Echo the result plus color preference
 echo "$CPUs;$BAR_COLOR;$BAR_BORDER_COLOR"

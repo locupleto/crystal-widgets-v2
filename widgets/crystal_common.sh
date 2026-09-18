@@ -11,6 +11,11 @@ export HTOP_TEMP_DIR=$HOME/tmp
 # crystal-calendar Start day of the week (defaults to SUNDAY if not set)
 export START_DAY_OF_WEEK="MONDAY"
 
+# crystal-htop-cpu-bar: one bar per logical CPU ("logical", the default) or
+# one per physical core with hyperthread siblings averaged ("physical").
+# Only matters on Intel Macs with Hyper-Threading; Apple silicon has no SMT.
+export CPU_BARS="logical"
+
 # ------ Example bar color schemes to play with -----------------------------
 
 # Default bar color is semi-transparent gold with white outline
