@@ -398,7 +398,7 @@ rm -f ~/config/ubersicht/crystal_htop_arm64 ~/config/ubersicht/crystal_htop_x86
 
 # 4. Re-apply your machine settings in ~/config/ubersicht/crystal_common.sh
 #    (step 1 overwrote it): HTOP_TEMP_DIR, FASTFETCH_CMD, bar colors,
-#    START_DAY_OF_WEEK. v1 defaulted HTOP_TEMP_DIR to /tmp; the v2 default
+#    START_DAY_OF_WEEK, CPU_BARS. v1 defaulted HTOP_TEMP_DIR to /tmp; the v2 default
 #    is $HOME/tmp — either works, it just must match the LaunchAgent plist.
 ```
 
